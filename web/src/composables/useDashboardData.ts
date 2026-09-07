@@ -66,7 +66,7 @@ export function useDashboardData() {
         cache: 'no-store',
         signal: controller.signal,
       })
-      if (!response.ok) throw new Error(`服务返回 ${response.status}`)
+      if (!response.ok) throw new Error('服务暂不可用')
       const payload: unknown = await response.json()
       if (!isDashboardData(payload)) throw new Error('统计接口格式不完整')
       data.value = payload
@@ -74,7 +74,11 @@ export function useDashboardData() {
       error.value = ''
     } catch (reason) {
       error.value =
-        reason instanceof Error && reason.name !== 'AbortError' ? reason.message : '连接超时'
+        reason instanceof TypeError
+          ? '连接中断'
+          : reason instanceof Error && reason.name !== 'AbortError'
+            ? reason.message
+            : '连接超时'
     } finally {
       window.clearTimeout(timeout)
       controller = undefined

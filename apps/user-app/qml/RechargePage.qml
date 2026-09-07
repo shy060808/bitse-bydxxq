@@ -1,5 +1,5 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
 Loader {
   objectName: 'rechargePage'
@@ -22,7 +22,7 @@ Loader {
         width: parent.width
         height: balance.height + Theme.cardPadding * 2
         radius: Theme.heroRadius
-        color: Theme.primary
+        color: Theme.surfaceDark
         Column {
           id: balance
           x: Theme.cardPadding
@@ -31,7 +31,7 @@ Loader {
           spacing: Theme.space
           AppText {
             text: '钱包余额'
-            color: '#d2e2d5'
+            color: Theme.heroMuted
           }
           MoneyText {
             cents: mobile.user.balanceCents
@@ -56,10 +56,10 @@ Loader {
             delegate: ActionButton {
               required property string modelData
               width: (content.width - Theme.space * 2) / 3
-              height: 64
               text: '¥ ' + modelData
               font.pixelSize: Theme.bodyLargeSize
-              tone: amount.text === modelData ? 'primary' : 'secondary'
+              variant: 'chip'
+              selected: amount.text === modelData
               onClicked: amount.text = modelData
             }
           }
@@ -99,7 +99,7 @@ Loader {
         width: parent.width
         height: note.implicitHeight + Theme.cardPadding * 2
         radius: Theme.cardRadius
-        color: '#eff1e8'
+        color: Theme.primaryLight
         AppText {
           id: note
           x: Theme.cardPadding

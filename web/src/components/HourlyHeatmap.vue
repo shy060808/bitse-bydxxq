@@ -24,14 +24,14 @@ const chartElement = useChart(() => {
     xAxis: {
       type: 'category',
       data: Array.from({ length: 24 }, (_, index) => index),
-      axisLabel: { color: '#71839b', fontSize: 9, formatter: (value: string) => `${value}h` },
+      axisLabel: { color: '#AAA8B8', fontSize: 9, formatter: (value: string) => `${value}h` },
       axisLine: { show: false },
       axisTick: { show: false },
     },
     yAxis: {
       type: 'category',
       data: weekdays,
-      axisLabel: { color: '#a8b7ca', fontSize: 10 },
+      axisLabel: { color: '#AAA8B8', fontSize: 10 },
       axisLine: { show: false },
       axisTick: { show: false },
     },
@@ -45,15 +45,15 @@ const chartElement = useChart(() => {
       itemWidth: 6,
       itemHeight: 70,
       text: ['高', '低'],
-      textStyle: { color: '#71839b', fontSize: 9 },
-      inRange: { color: ['#102c48', '#165b79', '#19b5bd', '#ffd166', '#ff6b6b'] },
+      textStyle: { color: '#AAA8B8', fontSize: 9 },
+      inRange: { color: ['#23242F', '#857AD6', '#C8C3EB', '#FFBE73', '#FF617A'] },
     },
     series: [
       {
         type: 'heatmap',
         data: values,
         label: { show: false },
-        itemStyle: { borderColor: '#0b1728', borderWidth: 2 },
+        itemStyle: { borderColor: '#23242F', borderWidth: 2 },
       },
     ],
   }

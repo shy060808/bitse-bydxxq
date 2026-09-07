@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Flickable {
   id: screen
@@ -21,59 +21,101 @@ Flickable {
     y: Theme.pagePadding
     width: parent.width - Theme.pagePadding * 2
     spacing: Theme.cardPadding
-    Button {
-      id: locationButton
-      objectName: 'chooseLocationButton'
+    Rectangle {
       width: parent.width
-      height: 56
-      padding: Theme.cardPadding
-      Accessible.name: '当前位置：' + mobile.locationName + '，选择位置'
-      onClicked: mobile.navigate('location')
-      background: Rectangle {
-        radius: Theme.cardRadius
-        color: locationButton.down ? '#d3e3d6' : Theme.primaryLight
-        border.color: Theme.primary
-        border.width: locationButton.visualFocus ? 2 : 0
-      }
-      contentItem: RowLayout {
-        spacing: Theme.controlGap
-        AppIcon {
-          name: 'map-pin'
-          Layout.preferredWidth: 24
-          Layout.preferredHeight: 24
+      height: searchControls.height + Theme.space * 2
+      radius: Theme.cardRadius
+      color: Theme.card
+      Column {
+        id: searchControls
+        x: Theme.space
+        y: Theme.space
+        width: parent.width - Theme.space * 2
+        spacing: Theme.microSpace
+        Button {
+          id: locationButton
+          objectName: 'chooseLocationButton'
+          width: parent.width
+          height: Theme.touchSize
+          padding: Theme.space
+          Accessible.name: '当前位置：' + mobile.locationName + '，选择位置'
+          onClicked: mobile.navigate('location')
+          background: Rectangle {
+            radius: Theme.cardRadius
+            color: locationButton.down || locationButton.visualFocus ? Theme.primaryLight : 'transparent'
+          }
+          contentItem: RowLayout {
+            spacing: Theme.controlGap
+            AppIcon {
+              name: 'map-pin'
+              Layout.preferredWidth: 24
+              Layout.preferredHeight: 24
+            }
+            AppText {
+              Layout.fillWidth: true
+              text: mobile.locationName
+              color: Theme.primaryText
+              font.pixelSize: Theme.bodySize
+              elide: Text.ElideRight
+            }
+            AppIcon {
+              name: 'chevron-down'
+              Layout.preferredWidth: 24
+              Layout.preferredHeight: 24
+            }
+          }
         }
-        AppText {
-          Layout.fillWidth: true
-          text: mobile.locationName
-          color: Theme.primary
-          font.pixelSize: Theme.bodySize
-          elide: Text.ElideRight
+        AppField {
+          objectName: 'stationSearchInput'
+          implicitHeight: Theme.touchSize
+          background: Rectangle { color: Theme.paper; radius: 8 }
+          width: parent.width
+          placeholderText: '搜索电站名称 / 地址'
+          text: mobile.query
+          onTextEdited: {
+            mobile.query = text
+            searchDebounce.restart()
+          }
+          onAccepted: {
+            searchDebounce.stop()
+            mobile.refreshStations()
+            focus = false
+          }
+          Timer {
+            id: searchDebounce
+            interval: 350
+            onTriggered: mobile.refreshStations()
+          }
         }
-        AppIcon {
-          name: 'chevron-down'
-          Layout.preferredWidth: 24
-          Layout.preferredHeight: 24
+        Row {
+          width: parent.width
+          spacing: Theme.space
+          Repeater {
+            model: [{key: 'distance', text: '距离', label: '距离优先'},
+                    {key: 'price', text: '价格', label: '价格最低'},
+                    {key: 'idle', text: '空闲', label: '空闲最多'}]
+            delegate: ActionButton {
+              required property var modelData
+              objectName: 'sort_' + modelData.key
+              width: (searchControls.width - Theme.space * 3) / 4
+              text: modelData.text
+              Accessible.name: modelData.label
+              horizontalPadding: Theme.space
+              variant: 'chip'
+              selected: mobile.sort === modelData.key
+              onClicked: mobile.sort = modelData.key
+            }
+          }
+          ActionButton {
+            objectName: 'fastOnlyButton'
+            width: (searchControls.width - Theme.space * 3) / 4
+            text: '仅快充'
+            horizontalPadding: Theme.space
+            variant: 'chip'
+            selected: mobile.fastOnly
+            onClicked: mobile.fastOnly = !mobile.fastOnly
+          }
         }
-      }
-    }
-    AppField {
-      objectName: 'stationSearchInput'
-      width: parent.width
-      placeholderText: '搜索电站名称 / 地址'
-      text: mobile.query
-      onTextEdited: {
-        mobile.query = text
-        searchDebounce.restart()
-      }
-      onAccepted: {
-        searchDebounce.stop()
-        mobile.refreshStations()
-        focus = false
-      }
-      Timer {
-        id: searchDebounce
-        interval: 350
-        onTriggered: mobile.refreshStations()
       }
     }
     Loader {
@@ -88,9 +130,7 @@ Flickable {
         onClicked: mobile.openActiveOrder()
         background: Rectangle {
           radius: Theme.cardRadius
-          color: activeBanner.down ? '#e7dfbd' : '#f0eddc'
-          border.color: '#e0d4a8'
-          border.width: activeBanner.visualFocus ? 2 : 1
+          color: activeBanner.down ? Theme.amberPressed : Theme.amberLight
         }
         contentItem: RowLayout {
           spacing: Theme.space
@@ -101,14 +141,14 @@ Flickable {
             AppText {
               text: '待处理：' + mobile.statusLabel(mobile.activeOrder.status) + '订单'
               font.weight: Font.Medium
-              color: '#796230'
+              color: Theme.amber
             }
             AppText {
               text: mobile.activeOrder.stationName
               width: parent.width
               elide: Text.ElideRight
               font.pixelSize: Theme.labelSize
-              color: '#796230'
+              color: Theme.amber
             }
           }
           AppIcon {
@@ -116,38 +156,6 @@ Flickable {
             Layout.preferredWidth: 24
             Layout.preferredHeight: 24
           }
-        }
-      }
-    }
-    Rectangle {
-      width: parent.width
-      height: 160
-      radius: Theme.heroRadius
-      color: Theme.primary
-      RowLayout {
-        anchors.fill: parent
-        anchors.margins: Theme.cardPadding
-        spacing: Theme.space
-        Column {
-          Layout.fillWidth: true
-          spacing: Theme.space
-          AppText {
-            width: parent.width
-            text: '附近充电站'
-            color: 'white'
-            font.pixelSize: Theme.titleSize
-            font.weight: Font.DemiBold
-            wrapMode: Text.WordWrap
-          }
-          AppText {
-            text: '附近 ' + mobile.stations.length + ' 座电站'
-            color: '#d2e2d5'
-            font.pixelSize: Theme.labelSize
-          }
-        }
-        HeroIllustration {
-          Layout.preferredWidth: screen.width < 400 ? 128 : 152
-          Layout.fillHeight: true
         }
       }
     }
@@ -170,52 +178,6 @@ Flickable {
         }
       }
     }
-    Column {
-      width: parent.width
-      spacing: Theme.space
-      RowLayout {
-        width: parent.width
-        AppText {
-          Layout.fillWidth: true
-          text: '附近电站'
-          font.pixelSize: Theme.bodyLargeSize
-          font.weight: Font.Medium
-        }
-        ActionButton {
-          objectName: 'fastOnlyButton'
-          Layout.preferredWidth: 88
-          text: '仅快充'
-          horizontalPadding: Theme.space
-          tone: mobile.fastOnly ? 'primary' : 'secondary'
-          onClicked: mobile.fastOnly = !mobile.fastOnly
-        }
-      }
-      Row {
-        width: parent.width
-        spacing: Theme.space
-        Repeater {
-          model: [{
-              "key": 'distance',
-              "text": '距离优先'
-            }, {
-              "key": 'price',
-              "text": '价格最低'
-            }, {
-              "key": 'idle',
-              "text": '空闲最多'
-            }]
-          delegate: ActionButton {
-            required property var modelData
-            objectName: 'sort_' + modelData.key
-            width: (content.width - Theme.space * 2) / 3
-            text: modelData.text
-            horizontalPadding: Theme.space
-            tone: mobile.sort === modelData.key ? 'primary' : 'secondary'
-            onClicked: mobile.sort = modelData.key
-          }
-        }
-      }
-    }
     Repeater {
       model: mobile.stations
       delegate: StationCard {
@@ -226,9 +188,10 @@ Flickable {
     }
     EmptyState {
       width: parent.width
-      visible: mobile.stations.length === 0 && !mobile.loadingStations
-      title: mobile.online ? '没有找到电站' : '暂时无法加载电站'
-      description: mobile.online ? '更换位置或清除筛选后重试。' : '检查连接后重试。'
+      objectName: 'stationEmptyState'
+      visible: mobile.stations.length === 0 && !mobile.loadingStations && !mobile.error
+      title: '没有找到电站'
+      description: '试试其他位置或筛选条件'
     }
   }
 }

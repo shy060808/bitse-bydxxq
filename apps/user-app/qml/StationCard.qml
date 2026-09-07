@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Button {
   id: card
@@ -12,9 +12,7 @@ Button {
   onClicked: mobile.openStation(stationData.id)
   background: Rectangle {
     radius: Theme.cardRadius
-    color: card.down ? '#f0f5ed' : Theme.card
-    border.color: card.visualFocus ? Theme.primary : card.highlighted ? '#bed2a9' : Theme.border
-    border.width: card.visualFocus ? 2 : 1
+    color: card.down || card.visualFocus ? Theme.primaryLight : Theme.card
   }
   contentItem: Column {
     id: info
@@ -30,6 +28,7 @@ Button {
         AppIcon {
           anchors.centerIn: parent
           name: 'zap'
+          color: card.highlighted ? Theme.surfaceDark : Theme.ink
         }
       }
       Column {
@@ -50,6 +49,34 @@ Button {
           elide: Text.ElideRight
         }
       }
+      Button {
+        id: navigation
+        objectName: 'navigateStation_' + card.stationData.id
+        Layout.preferredWidth: Math.max(Theme.touchSize, distanceText.implicitWidth)
+        Layout.preferredHeight: Theme.touchSize
+        Layout.alignment: Qt.AlignRight | Qt.AlignTop
+        padding: 0
+        Accessible.name: '导航到' + card.stationData.name + '，直线距离' + card.stationData.distanceKm.toFixed(1) + '公里'
+        onClicked: mobile.openNavigation(card.stationData)
+        background: Rectangle {
+          radius: 8
+          color: navigation.down ? Theme.primarySoftPressed : navigation.hovered || navigation.visualFocus ? Theme.primaryLight : 'transparent'
+        }
+        contentItem: Column {
+          spacing: Theme.microSpace
+          AppIcon {
+            name: 'navigation'
+            anchors.right: parent.right
+          }
+          AppText {
+            id: distanceText
+            anchors.right: parent.right
+            text: card.stationData.distanceKm.toFixed(1) + ' km'
+            font.pixelSize: Theme.labelSize
+            color: Theme.muted
+          }
+        }
+      }
     }
     Flow {
       width: parent.width
@@ -57,36 +84,38 @@ Button {
       visible: card.highlighted && card.stationData.predictedAvailableChargers >= 0
       Badge {
         text: '1 小时后预计空闲 ' + card.stationData.predictedAvailableChargers + ' 桩'
-        fill: '#f0f3eb'
+        fill: Theme.paper
         textColor: Theme.muted
       }
     }
-    RowLayout {
+    Column {
       width: parent.width
-      spacing: Theme.cardPadding
-      Column {
-        Layout.fillWidth: true
-        spacing: Theme.microSpace
+      spacing: Theme.microSpace
+      RowLayout {
+        width: parent.width
+        spacing: Theme.cardPadding
         MoneyText {
           objectName: 'stationPrice'
           cents: card.stationData.priceCents
           suffix: '/度'
+          Layout.alignment: Qt.AlignBaseline
+        }
+        Item {
+          Layout.fillWidth: true
         }
         AppText {
           text: '空闲 ' + card.stationData.idleChargers + ' / ' + card.stationData.totalChargers + ' 桩'
           font.pixelSize: Theme.labelSize
           color: Theme.muted
+          Layout.alignment: Qt.AlignRight | Qt.AlignBaseline
         }
       }
-      ActionButton {
-        objectName: 'navigateStation_' + card.stationData.id
-        Layout.preferredWidth: 112
-        text: card.stationData.distanceKm.toFixed(1) + ' km'
-        trailingIcon: 'navigation'
-        horizontalPadding: Theme.space
-        tone: 'secondary'
-        Accessible.name: '导航到' + card.stationData.name + '，直线距离' + card.stationData.distanceKm.toFixed(1) + '公里'
-        onClicked: mobile.openNavigation(card.stationData)
+      AvailabilityBar {
+        objectName: 'stationAvailability_' + card.stationData.id
+        width: parent.width
+        total: card.stationData.totalChargers
+        available: card.stationData.idleChargers
+        faults: card.stationData.faultChargers
       }
     }
   }

@@ -45,7 +45,7 @@ jobs:
       - name: Validate tools and shell scripts
         run: |
           scripts/setup_env.sh --check
-          shellcheck -x scripts/setup_env.sh scripts/build.sh scripts/qt-env.sh scripts/test.sh
+          shellcheck -x scripts/*.sh ml/download_datasets.sh
       - name: Build all applications, service and dashboard
         run: scripts/build.sh
       - name: Check formatting and run service, ML and Qt UI tests

@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Rectangle {
   id: root
@@ -8,6 +8,7 @@ Rectangle {
   width: 430
   height: 860
   color: Theme.paper
+  readonly property bool refreshing: mobile.busy || (mobile.page !== 'orders' && mobile.loadingStations)
   readonly property bool isTab: mobile.page === 'home' || mobile.page === 'orders' || mobile.page === 'profile'
   readonly property var pageInfo: ({
       "login": {
@@ -50,6 +51,10 @@ Rectangle {
         "title": '钱包充值',
         "source": 'RechargePage.qml'
       },
+      "settings": {
+        "title": '设置',
+        "source": 'SettingsPage.qml'
+      },
       "editProfile": {
         "title": '个人信息',
         "source": 'EditProfilePage.qml'
@@ -89,15 +94,15 @@ Rectangle {
           visible: root.isTab || mobile.page === 'station'
           iconName: 'refresh-cw'
           label: '刷新当前页面'
-          enabled: !mobile.busy
+          enabled: !root.refreshing && !mobile.loadingOrders
           onClicked: mobile.refresh()
         }
       }
     }
     Rectangle {
       Layout.fillWidth: true
-      Layout.preferredHeight: mobile.busy ? 4 : 0
-      visible: mobile.busy
+      Layout.preferredHeight: 4
+      opacity: root.refreshing ? 1 : 0
       color: Theme.primaryLight
       clip: true
       Rectangle {
@@ -106,55 +111,13 @@ Rectangle {
         color: Theme.primary
         SequentialAnimation on x  {
           loops: Animation.Infinite
-          running: mobile.busy
+          running: root.refreshing
           NumberAnimation {
             from: -130
             to: root.width
             duration: 1000
             easing.type: Easing.InOutQuad
           }
-        }
-      }
-    }
-    Button {
-      Layout.fillWidth: true
-      Layout.preferredHeight: visible ? Math.max(48, offlineText.implicitHeight + 32) : 0
-      visible: !mobile.online
-      padding: Theme.pagePadding
-      Accessible.name: '连接中断，点击重试'
-      onClicked: mobile.refresh()
-      background: Rectangle {
-        color: parent.down ? '#f4e5c5' : '#fff2d9'
-      }
-      contentItem: AppText {
-        id: offlineText
-        text: '连接中断，点击重试'
-        font.pixelSize: Theme.bodySize
-        color: Theme.amber
-        wrapMode: Text.WordWrap
-      }
-    }
-    Rectangle {
-      Layout.fillWidth: true
-      Layout.preferredHeight: visible ? Math.max(64, errorText.implicitHeight + 32) : 0
-      visible: mobile.error.length > 0
-      color: Theme.dangerLight
-      RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: Theme.pagePadding
-        anchors.rightMargin: Theme.pagePadding
-        spacing: Theme.space
-        AppText {
-          id: errorText
-          Layout.fillWidth: true
-          text: mobile.error
-          wrapMode: Text.WordWrap
-          color: Theme.danger
-        }
-        IconButton {
-          label: '关闭错误提示'
-          iconName: 'x'
-          onClicked: mobile.clearError()
         }
       }
     }
@@ -206,9 +169,7 @@ Rectangle {
             Accessible.selected: highlighted
             onClicked: mobile.selectTab(modelData.key)
             background: Rectangle {
-              color: tabButton.down ? Theme.primaryLight : 'transparent'
-              border.color: Theme.primary
-              border.width: tabButton.visualFocus ? 2 : 0
+              color: tabButton.down || tabButton.visualFocus ? Theme.primaryLight : 'transparent'
             }
             contentItem: Column {
               opacity: tabButton.enabled ? 1 : 0.5
@@ -223,6 +184,7 @@ Rectangle {
                 AppIcon {
                   anchors.centerIn: parent
                   name: tabButton.modelData.icon
+                  color: tabButton.highlighted ? Theme.surfaceDark : Theme.ink
                   opacity: tabButton.highlighted ? 1 : 0.65
                 }
               }
@@ -231,7 +193,7 @@ Rectangle {
                 text: tabButton.modelData.label
                 font.pixelSize: Theme.labelSize
                 font.weight: tabButton.highlighted ? Font.DemiBold : Font.Normal
-                color: tabButton.highlighted ? Theme.primary : Theme.muted
+                color: tabButton.highlighted ? Theme.primaryText : Theme.muted
                 horizontalAlignment: Text.AlignHCenter
               }
             }
@@ -240,20 +202,60 @@ Rectangle {
       }
     }
   }
-  Popup {
+  Rectangle {
+    id: errorBanner
+    objectName: 'errorBanner'
+    property string message: ''
+    z: 20
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.margins: Theme.pagePadding
+    radius: Theme.cardRadius
+    y: mobile.error.length > 0 ? Theme.space : -height
+    opacity: mobile.error.length > 0 ? 1 : 0
+    Behavior on y { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+    Behavior on opacity { NumberAnimation { duration: 160 } }
+    height: Math.max(64, errorText.implicitHeight + 32)
+    visible: opacity > 0
+    color: Theme.dangerLight
+    RowLayout {
+      anchors.fill: parent
+      anchors.leftMargin: Theme.pagePadding
+      anchors.rightMargin: Theme.pagePadding
+      spacing: Theme.space
+      AppText {
+        id: errorText
+        Layout.fillWidth: true
+        text: errorBanner.message
+        wrapMode: Text.WordWrap
+        color: Theme.danger
+      }
+      IconButton {
+        label: '关闭错误提示'
+        iconName: 'x'
+        onClicked: mobile.clearError()
+      }
+    }
+  }
+  Rectangle {
     id: toast
     objectName: 'toastPopup'
-    x: Theme.pagePadding
-    y: Math.max(Theme.space, root.height - height - 104)
-    width: root.width - Theme.pagePadding * 2
-    padding: Theme.cardPadding
-    closePolicy: Popup.NoAutoClose
+    anchors.centerIn: parent
+    width: Math.min(root.width - Theme.pagePadding * 2, 360)
+    height: toastText.implicitHeight + Theme.cardPadding * 2
+    radius: Theme.cardRadius
+    color: Theme.toast
+    z: 10
+    visible: opacity > 0
+    opacity: 0
     property string message: ''
-    background: Rectangle {
-      color: '#ed223f30'
-      radius: Theme.cardRadius
-    }
-    contentItem: AppText {
+    function open() { opacity = 1 }
+    function close() { opacity = 0 }
+    Behavior on opacity { NumberAnimation { duration: 160 } }
+    AppText {
+      id: toastText
+      anchors.centerIn: parent
+      width: parent.width - Theme.cardPadding * 2
       text: toast.message
       color: 'white'
       wrapMode: Text.WordWrap
@@ -261,7 +263,7 @@ Rectangle {
     }
     Timer {
       id: toastTimer
-      interval: 3500
+      interval: 2400
       onTriggered: toast.close()
     }
   }
@@ -279,7 +281,7 @@ Rectangle {
       radius: Theme.heroRadius
     }
     Overlay.modal: Rectangle {
-      color: '#75102017'
+      color: Theme.overlay
     }
     contentItem: Column {
       spacing: Theme.cardPadding
@@ -307,7 +309,14 @@ Rectangle {
   }
   Connections {
     target: mobile
+    function onErrorChanged() {
+      if (mobile.error.length > 0) {
+        errorBanner.message = mobile.error
+        toast.close()
+      }
+    }
     function onNotification(message) {
+      if (mobile.error.length > 0) return
       toast.message = message
       toast.open()
       toastTimer.restart()

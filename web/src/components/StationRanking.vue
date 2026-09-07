@@ -21,14 +21,14 @@ const chartElement = useChart(() => {
     },
     xAxis: {
       type: 'value',
-      axisLabel: { color: '#6f819a', fontSize: 10 },
+      axisLabel: { color: '#AAA8B8', fontSize: 10 },
       splitLine: { lineStyle: { color: 'rgba(122,153,190,.12)' } },
     },
     yAxis: {
       type: 'category',
       inverse: true,
       data: rows.map((row) => row.stationName),
-      axisLabel: { color: '#b8c5d7', fontSize: 11, width: 72, overflow: 'truncate' },
+      axisLabel: { color: '#AAA8B8', fontSize: 11, width: 72, overflow: 'truncate' },
       axisLine: { show: false },
       axisTick: { show: false },
     },
@@ -40,15 +40,15 @@ const chartElement = useChart(() => {
           value: row.energyKwh,
           itemStyle: {
             color: new graphic.LinearGradient(1, 0, 0, 0, [
-              { offset: 0, color: '#20d7ed' },
-              { offset: 1, color: '#1f6eff' },
+              { offset: 0, color: '#C8C3EB' },
+              { offset: 1, color: '#857AD6' },
             ]),
           },
         })),
         label: {
           show: true,
           position: 'right',
-          color: '#c8f6ff',
+          color: '#F0EFF5',
           fontSize: 10,
           formatter: ({ dataIndex }) => rows[dataIndex].energyKwh.toFixed(1),
         },

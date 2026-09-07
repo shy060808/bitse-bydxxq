@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Loader {
   objectName: 'profilePage'
@@ -30,9 +30,7 @@ Loader {
         onClicked: mobile.navigate('editProfile')
         background: Rectangle {
           radius: Theme.cardRadius
-          color: profileButton.down ? Theme.primaryLight : Theme.card
-          border.color: Theme.primary
-          border.width: profileButton.visualFocus ? 2 : 0
+          color: profileButton.down || profileButton.visualFocus ? Theme.primaryLight : Theme.card
         }
         contentItem: RowLayout {
           spacing: Theme.cardPadding
@@ -40,12 +38,12 @@ Loader {
             Layout.preferredWidth: 64
             Layout.preferredHeight: 64
             radius: Theme.heroRadius
-            color: '#e6eae3'
+            color: Theme.disabled
             Image {
               anchors.centerIn: parent
               width: mobile.avatarSource ? 48 : 24
               height: width
-              source: mobile.avatarSource || 'qrc:/icons/user.svg'
+              source: mobile.avatarSource || appearance.iconSource(':/icons/user.svg', Theme.ink)
               fillMode: Image.PreserveAspectCrop
               opacity: mobile.avatarSource ? 1 : 0.65
             }
@@ -76,29 +74,34 @@ Loader {
         width: parent.width
         height: walletContent.height + Theme.cardPadding * 2
         radius: Theme.heroRadius
-        color: Theme.primary
+        color: Theme.surfaceDark
         Column {
           id: walletContent
           x: Theme.cardPadding
           y: Theme.cardPadding
           width: parent.width - Theme.cardPadding * 2
-          spacing: Theme.cardPadding
-          AppText {
-            text: '钱包余额'
-            color: '#d2e2d5'
+          spacing: Theme.space
+          RowLayout {
+            width: parent.width
+            spacing: Theme.space
+            AppText {
+              Layout.fillWidth: true
+              text: '钱包余额'
+              color: Theme.heroMuted
+            }
+            ActionButton {
+              objectName: 'walletRechargeButton'
+              Layout.preferredWidth: 64
+              text: '充值'
+              variant: 'text'
+              textColor: Theme.heroMuted
+              onClicked: mobile.navigate('recharge')
+            }
           }
           MoneyText {
             cents: mobile.user.balanceCents
             valueColor: 'white'
             valueSize: 36
-          }
-          ActionButton {
-            objectName: 'walletRechargeButton'
-            width: parent.width
-            text: '充值'
-            leadingIcon: 'plus'
-            tone: 'secondary'
-            onClicked: mobile.navigate('recharge')
           }
         }
       }
@@ -119,34 +122,54 @@ Loader {
           lineHeight: 1.5
         }
       }
-      Column {
+      Rectangle {
         width: parent.width
-        spacing: Theme.space
-        MenuRow {
+        height: profileOptions.height
+        radius: Theme.cardRadius
+        color: Theme.card
+        clip: true
+        Column {
+          id: profileOptions
           width: parent.width
-          title: '个人信息'
-          iconName: 'user'
-          onClicked: mobile.navigate('editProfile')
-        }
-        MenuRow {
-          width: parent.width
-          title: '充电记录'
-          iconName: 'list'
-          onClicked: mobile.selectTab('orders')
-        }
-        MenuRow {
-          width: parent.width
-          title: '当前位置'
-          description: mobile.locationName
-          iconName: 'map-pin'
-          onClicked: mobile.navigate('location')
+          MenuRow {
+            width: parent.width
+            title: '充电记录'
+            iconName: 'list'
+            onClicked: mobile.selectTab('orders')
+          }
+          Rectangle {
+            x: Theme.cardPadding
+            width: parent.width - Theme.cardPadding * 2
+            height: 1
+            color: Theme.border
+          }
+          MenuRow {
+            width: parent.width
+            title: '当前位置'
+            description: mobile.locationName
+            iconName: 'map-pin'
+            onClicked: mobile.navigate('location')
+          }
+          Rectangle {
+            x: Theme.cardPadding
+            width: parent.width - Theme.cardPadding * 2
+            height: 1
+            color: Theme.border
+          }
+          MenuRow {
+            objectName: 'settingsButton'
+            width: parent.width
+            title: '设置'
+            iconName: 'settings'
+            onClicked: mobile.navigate('settings')
+          }
         }
       }
       ActionButton {
         objectName: 'logoutButton'
         width: parent.width
         text: '退出登录'
-        tone: 'quiet'
+        variant: 'text'
         enabled: !mobile.busy
         onClicked: logoutConfirm.open()
       }
@@ -162,7 +185,7 @@ Loader {
         radius: Theme.heroRadius
       }
       Overlay.modal: Rectangle {
-        color: '#75102017'
+        color: Theme.overlay
       }
       contentItem: Column {
         spacing: Theme.cardPadding
@@ -193,7 +216,7 @@ Loader {
         ActionButton {
           width: parent.width
           text: '暂不退出'
-          tone: 'quiet'
+          variant: 'text'
           onClicked: logoutConfirm.close()
         }
       }

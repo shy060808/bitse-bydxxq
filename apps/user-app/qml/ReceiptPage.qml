@@ -1,5 +1,5 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
 Loader {
   objectName: 'receiptPage'
@@ -125,7 +125,7 @@ Loader {
                 width: parent.width
                 label: '订单状态'
                 value: mobile.statusLabel(screen.order.status)
-                valueColor: Theme.primary
+                valueColor: Theme.primaryText
               }
             }
             Rectangle {
@@ -169,6 +169,7 @@ Loader {
         anchors.fill: parent
         anchors.margins: Theme.pagePadding
         text: '完成'
+        variant: 'text'
         onClicked: mobile.selectTab('orders')
       }
     }

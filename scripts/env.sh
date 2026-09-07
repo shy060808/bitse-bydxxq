@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# Source this file. Standard Ubuntu Qt installs require no overrides.
-# Load tools installed by setup_env.sh without replacing existing global binaries.
+# Shared build paths, toolchain and Qt runtime.
+root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+build_dir="${CHARGING_BUILD_DIR:-$root_dir/build/full}"
+[[ "$build_dir" == /* ]] || build_dir="$root_dir/$build_dir"
 for charging_tool_bin in \
   "$HOME/.local/opt/charging-tools/node-v24.20.0/bin" \
   "$HOME/.local/opt/charging-tools/pnpm/bin" \

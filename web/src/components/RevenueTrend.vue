@@ -13,7 +13,7 @@ const chartElement = useChart(() => {
     legend: {
       top: 0,
       right: 0,
-      textStyle: { color: '#7196b1', fontSize: 10 },
+      textStyle: { color: '#AAA8B8', fontSize: 10 },
       data: ['每日营收', '订单数量'],
     },
     tooltip: {
@@ -31,7 +31,7 @@ const chartElement = useChart(() => {
       boundaryGap: false,
       data: dates,
       axisLabel: {
-        color: '#71839b',
+        color: '#AAA8B8',
         fontSize: 10,
         interval: Math.max(0, Math.floor(dates.length / 6) - 1),
       },
@@ -41,13 +41,13 @@ const chartElement = useChart(() => {
     yAxis: [
       {
         type: 'value',
-        axisLabel: { color: '#71839b', fontSize: 10, formatter: (value: number) => `¥${value}` },
+        axisLabel: { color: '#AAA8B8', fontSize: 10, formatter: (value: number) => `¥${value}` },
         splitLine: { lineStyle: { color: 'rgba(122,153,190,.12)', type: 'dashed' } },
       },
       {
         type: 'value',
         minInterval: 1,
-        axisLabel: { color: '#52718d', fontSize: 10, formatter: '{value} 单' },
+        axisLabel: { color: '#AAA8B8', fontSize: 10, formatter: '{value} 单' },
         splitLine: { show: false },
       },
     ],
@@ -57,7 +57,7 @@ const chartElement = useChart(() => {
         type: 'bar',
         yAxisIndex: 1,
         data: props.data.map((item) => item.orderCount),
-        itemStyle: { color: '#35729855' },
+        itemStyle: { color: '#857AD688' },
         barMaxWidth: 14,
       },
       {
@@ -67,12 +67,12 @@ const chartElement = useChart(() => {
         symbol: 'circle',
         symbolSize: 5,
         data: values,
-        lineStyle: { width: 3, color: '#41d9ee' },
-        itemStyle: { color: '#b5f8ff', borderColor: '#41d9ee', borderWidth: 2 },
+        lineStyle: { width: 3, color: '#C8C3EB' },
+        itemStyle: { color: '#F0EFF5', borderColor: '#C8C3EB', borderWidth: 2 },
         areaStyle: {
           color: new graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(45,220,238,.34)' },
-            { offset: 1, color: 'rgba(45,220,238,0)' },
+            { offset: 0, color: 'rgba(200,195,235,.34)' },
+            { offset: 1, color: 'rgba(200,195,235,0)' },
           ]),
         },
       },

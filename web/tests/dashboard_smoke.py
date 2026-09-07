@@ -68,7 +68,9 @@ with sync_playwright() as playwright:
   with page.expect_response('**/api/dashboard') as first_response:
     page.goto(args.url)
   actual = first_response.value.json()
-  page.get_by_text('业务服务已连接').wait_for()
+  page.locator('.capacity-item').first.wait_for()
+  assert page.evaluate('(font) => document.fonts.check(font)', '14px "HarmonyOS Sans SC"')
+  assert page.locator('.connection').count() == 0
   page.wait_for_timeout(1000)
   for width, height in [(1920, 1080), (1366, 768)]:
     page.set_viewport_size({'width': width, 'height': height})
@@ -268,21 +270,23 @@ with sync_playwright() as playwright:
   page.wait_for_timeout(1000)
   count = page.locator('.kpi-card').first.inner_text()
   page.get_by_role('button', name='刷新数据').click()
-  page.get_by_text('连接中断 · 保留最近快照').wait_for()
+  page.get_by_text('服务暂不可用', exact=True).wait_for()
+  assert page.get_by_text('服务暂不可用', exact=True).count() == 1
+  assert page.locator('.dashboard-error').count() == 0
   assert page.locator('.kpi-card').first.inner_text() == count
 
   initial = browser.new_page(viewport={'width': 1366, 'height': 768})
   initial.on('pageerror', lambda error: errors.append(str(error)))
   initial.route('**/api/dashboard', lambda route: route.fulfill(status=503))
   initial.goto(args.url)
-  initial.get_by_text('暂无有效数据', exact=True).wait_for()
+  initial.get_by_text('服务暂不可用', exact=True).wait_for()
   no_forecast = copy.deepcopy(restored)
   no_forecast['forecast24h'] = []
   no_forecast['forecastMeta'] = {'generatedAt': '', 'modelVersion': '', 'source': ''}
   initial.unroute('**/api/dashboard')
   initial.route('**/api/dashboard', lambda route: route.fulfill(json=no_forecast))
   initial.get_by_role('button', name='刷新数据').click()
-  initial.get_by_text('业务服务已连接', exact=True).wait_for()
+  initial.get_by_text('服务暂不可用', exact=True).wait_for(state='detached')
   initial.get_by_text('等待预测任务', exact=True).wait_for()
   assert initial.locator('.station-detail b').inner_text() == restored['stations'][0]['name']
   check_layout(initial, 1366, 768)

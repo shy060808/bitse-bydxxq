@@ -28,10 +28,10 @@ const element = useChart(
       max: (range: { min: number; max: number }) =>
         range.max + Math.max(0.004, (range.max - range.min) * 0.08),
       name: 'E',
-      nameTextStyle: { color: '#577a9a' },
-      axisLine: { show: true, lineStyle: { color: '#294768' } },
-      axisLabel: { color: '#537594', formatter: (value: number) => `${value.toFixed(2)}°` },
-      splitLine: { lineStyle: { color: '#132f4d' } },
+      nameTextStyle: { color: '#AAA8B8' },
+      axisLine: { show: true, lineStyle: { color: '#393A48' } },
+      axisLabel: { color: '#AAA8B8', formatter: (value: number) => `${value.toFixed(2)}°` },
+      splitLine: { lineStyle: { color: '#393A48' } },
     },
     yAxis: {
       type: 'value',
@@ -41,9 +41,9 @@ const element = useChart(
       max: (range: { min: number; max: number }) =>
         range.max + Math.max(0.004, (range.max - range.min) * 0.08),
       name: 'N',
-      nameTextStyle: { color: '#577a9a' },
-      axisLabel: { color: '#537594', formatter: (value: number) => `${value.toFixed(2)}°` },
-      splitLine: { lineStyle: { color: '#132f4d' } },
+      nameTextStyle: { color: '#AAA8B8' },
+      axisLabel: { color: '#AAA8B8', formatter: (value: number) => `${value.toFixed(2)}°` },
+      splitLine: { lineStyle: { color: '#393A48' } },
     },
     series: [
       {
@@ -57,20 +57,20 @@ const element = useChart(
           show: true,
           position: 'top',
           distance: 10,
-          color: '#bee6ff',
+          color: '#F0EFF5',
           fontSize: 12,
           formatter: '{b}',
           backgroundColor: 'rgba(4,16,33,.75)',
           padding: [3, 6],
         },
         labelLayout: { hideOverlap: true },
-        itemStyle: { shadowBlur: 18, shadowColor: '#17d9f9' },
+        itemStyle: { shadowBlur: 8, shadowColor: '#C8C3EB' },
         data: props.stations.map((station) => ({
           name: station.name,
           value: [station.longitude, station.latitude, station.totalChargers],
           itemStyle: {
-            color: station.idleChargers > 0 ? '#3be4d5' : '#ffbd65',
-            borderColor: selected.value?.id === station.id ? '#dcfff8' : 'transparent',
+            color: station.idleChargers > 0 ? '#C8C3EB' : '#FFBE73',
+            borderColor: selected.value?.id === station.id ? '#F0EFF5' : 'transparent',
             borderWidth: 2,
           },
         })),

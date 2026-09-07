@@ -4,13 +4,11 @@ set -euo pipefail
 root_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 data_dir="${DATASETS_DIR:-$root_dir/reference/datasets}"
 
-# Override these when the network cannot access the default Figshare host.
-figshare_base_url="${FIGSHARE_BASE_URL:-https://ndownloader.figshare.com/files}"
-figshare_query="${FIGSHARE_QUERY:-}"
+figshare_base_url=https://ndownloader.figshare.com/files
 
 usage() {
   cat <<'EOF'
-Usage: scripts/download_datasets.sh [all|beijing|jiaxing]
+Usage: ml/download_datasets.sh [all|beijing|jiaxing]
 
 Downloads the retained research datasets into reference/datasets/ and verifies
 each file with the checksum published by its repository.
@@ -28,7 +26,7 @@ download_figshare_file() {
   local file_id="$1"
   local target="$2"
   local checksum="$3"
-  local url="$figshare_base_url/$file_id$figshare_query"
+  local url="$figshare_base_url/$file_id"
   local temp_target="${target}.part"
 
   mkdir -p "$(dirname "$target")"
@@ -59,32 +57,16 @@ extract_figshare_zip() {
   local checksum="$3"
   local output_dir="$4"
   local expected_file="$5"
-  local url="$figshare_base_url/$file_id$figshare_query"
-  local temp_archive
+  local archive="$output_dir/$archive_name"
 
   if [[ -f "$output_dir/$expected_file" ]]; then
-    printf 'skip  %s (already extracted)\n' "$archive_name"
+    printf 'skip  %s\n' "$output_dir/$expected_file"
     return
   fi
 
-  temp_archive="$(mktemp "${TMPDIR:-/tmp}/charging-dataset.XXXXXX.zip")"
-  printf 'get   %s (extracting)\n' "$archive_name"
-
-  if ! curl --fail --location --retry 8 --retry-delay 5 \
-    --connect-timeout 20 --output "$temp_archive" "$url"; then
-    rm -f "$temp_archive"
-    return 1
-  fi
-
-  if ! verify_md5 "$checksum" "$temp_archive"; then
-    printf 'checksum mismatch: %s\n' "$archive_name" >&2
-    rm -f "$temp_archive"
-    return 1
-  fi
-
-  mkdir -p "$output_dir"
-  python3 -m zipfile -e "$temp_archive" "$output_dir"
-  rm -f "$temp_archive"
+  download_figshare_file "$file_id" "$archive" "$checksum"
+  python3 -m zipfile -e "$archive" "$output_dir"
+  rm "$archive"
   printf 'ok    %s\n' "$output_dir/$expected_file"
 }
 

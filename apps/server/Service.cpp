@@ -176,7 +176,7 @@ QJsonValue Service::dispatch(const QString &action, const QJsonObject &p,
   }
   if (action == "admin.logs")
     return db_.rows("SELECT id,action,target,detail,created_at AS createdAt "
-                    "FROM audit_logs ORDER BY id DESC LIMIT 200");
+                    "FROM audit_logs ORDER BY id DESC");
   if (action.startsWith("orders.") || action == "admin.orders")
     return orderAction(action, p, actor);
   if (action.startsWith("stations.") || action.startsWith("location.")

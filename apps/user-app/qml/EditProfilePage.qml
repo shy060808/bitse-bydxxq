@@ -1,5 +1,5 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
+import QtQuick
+import QtQuick.Controls
 
 Loader {
   objectName: 'editProfilePage'
@@ -33,12 +33,10 @@ Loader {
           onClicked: mobile.chooseAvatar()
           background: Rectangle {
             radius: Theme.heroRadius
-            color: avatarButton.down ? '#d3e1d1' : '#e5e9e2'
-            border.width: avatarButton.visualFocus ? 2 : 0
-            border.color: Theme.primary
+            color: avatarButton.down || avatarButton.visualFocus ? Theme.primarySoftPressed : Theme.disabled
           }
           contentItem: Image {
-            source: mobile.avatarSource || 'qrc:/icons/user.svg'
+            source: mobile.avatarSource || appearance.iconSource(':/icons/user.svg', Theme.ink)
             sourceSize.width: 144
             sourceSize.height: 144
             fillMode: Image.PreserveAspectFit
@@ -48,7 +46,7 @@ Loader {
         ActionButton {
           anchors.horizontalCenter: parent.horizontalCenter
           text: '更换头像'
-          tone: 'quiet'
+          variant: 'text'
           enabled: !mobile.busy
           onClicked: mobile.chooseAvatar()
         }

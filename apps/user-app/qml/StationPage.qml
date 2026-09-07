@@ -1,6 +1,6 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
 
 Loader {
   objectName: 'stationPage'
@@ -23,7 +23,7 @@ Loader {
         width: parent.width
         height: header.height + Theme.cardPadding * 2
         radius: Theme.heroRadius
-        color: Theme.primary
+        color: Theme.surfaceDark
         Column {
           id: header
           x: Theme.cardPadding
@@ -34,7 +34,7 @@ Loader {
             text: mobile.station.region
             visible: text.length > 0
             maximumWidth: parent.width
-            fill: '#42785c'
+            fill: Theme.surfaceDarkRaised
             textColor: 'white'
           }
           Column {
@@ -51,7 +51,7 @@ Loader {
             AppText {
               width: parent.width
               text: mobile.station.address
-              color: '#d2e2d5'
+              color: Theme.heroMuted
               font.pixelSize: Theme.bodySize
               wrapMode: Text.WordWrap
               lineHeight: 1.4
@@ -69,7 +69,7 @@ Loader {
               }
               AppText {
                 text: '电价（元/度）'
-                color: '#d2e2d5'
+                color: Theme.heroMuted
                 font.pixelSize: Theme.labelSize
               }
             }
@@ -84,7 +84,7 @@ Loader {
               }
               AppText {
                 text: '空闲电桩 / 全部'
-                color: '#d2e2d5'
+                color: Theme.heroMuted
                 font.pixelSize: Theme.labelSize
               }
             }
@@ -92,9 +92,9 @@ Loader {
           ActionButton {
             objectName: 'stationNavigationButton'
             width: parent.width
-            tone: 'secondary'
+            variant: 'text'
+            textColor: Theme.heroMuted
             text: '直线 ' + mobile.station.distanceKm.toFixed(1) + ' km · 导航'
-            trailingIcon: 'navigation'
             onClicked: mobile.openNavigation(mobile.station)
           }
         }
@@ -104,7 +104,7 @@ Loader {
         height: forecastNote.implicitHeight + Theme.cardPadding * 2
         visible: !!mobile.station.forecastAt
         radius: Theme.cardRadius
-        color: '#edf1df'
+        color: Theme.primaryLight
         AppText {
           id: forecastNote
           x: Theme.cardPadding
@@ -112,7 +112,7 @@ Loader {
           width: parent.width - Theme.cardPadding * 2
           text: '1 小时后预计空闲 ' + mobile.station.predictedAvailableChargers + ' 桩'
           font.pixelSize: Theme.bodySize
-          color: '#586e35'
+          color: Theme.primaryText
           wrapMode: Text.WordWrap
           lineHeight: 1.5
         }
@@ -132,13 +132,13 @@ Loader {
           height: chargerContent.height + Theme.cardPadding * 2
           radius: Theme.cardRadius
           color: Theme.card
-          border.color: modelData.status === 'idle' ? '#d2e0ce' : Theme.border
+
           Column {
             id: chargerContent
             x: Theme.cardPadding
             y: Theme.cardPadding
             width: parent.width - Theme.cardPadding * 2
-            spacing: Theme.cardPadding
+            spacing: Theme.controlGap
             RowLayout {
               width: parent.width
               spacing: Theme.controlGap
@@ -156,33 +156,45 @@ Loader {
                 Layout.fillWidth: true
                 spacing: Theme.microSpace
                 AppText {
+                  width: parent.width
                   text: chargerCard.modelData.code
                   font.pixelSize: Theme.bodyLargeSize
                   font.weight: Font.Medium
+                  elide: Text.ElideRight
                 }
                 AppText {
+                  width: parent.width
                   text: (chargerCard.modelData.type === 'dc' ? '直流快充' : '交流慢充') + ' · ' + chargerCard.modelData.powerKw + ' kW'
                   color: Theme.muted
                   font.pixelSize: Theme.labelSize
+                  elide: Text.ElideRight
                 }
-              }
-            }
-            RowLayout {
-              width: parent.width
-              Badge {
-                text: mobile.statusLabel(chargerCard.modelData.status)
-                textColor: chargerCard.modelData.status === 'idle' ? Theme.primary : chargerCard.modelData.status === 'fault' ? Theme.danger : Theme.muted
-                fill: chargerCard.modelData.status === 'idle' ? Theme.primaryLight : chargerCard.modelData.status === 'fault' ? Theme.dangerLight : '#f1f2ef'
-              }
-              Item {
-                Layout.fillWidth: true
               }
               ActionButton {
                 objectName: 'reserveCharger_' + chargerCard.modelData.id
-                Layout.preferredWidth: 120
-                text: chargerCard.modelData.status === 'idle' ? '预约充电' : '暂不可用'
+                Layout.preferredWidth: 96
+                variant: 'text'
+                textColor: Theme.primaryText
+                text: '预约充电'
+                visible: chargerCard.modelData.status === 'idle'
                 enabled: chargerCard.modelData.status === 'idle' && !mobile.busy
                 onClicked: mobile.reserve(Number(chargerCard.modelData.id))
+              }
+            }
+            Column {
+              width: parent.width
+              spacing: Theme.microSpace
+              AppText {
+                text: mobile.statusLabel(chargerCard.modelData.status)
+                color: Theme.muted
+                font.pixelSize: Theme.labelSize
+              }
+              AvailabilityBar {
+                objectName: 'chargerAvailability_' + chargerCard.modelData.id
+                width: parent.width
+                total: 1
+                available: chargerCard.modelData.status === 'idle' ? 1 : 0
+                faults: chargerCard.modelData.status === 'fault' || chargerCard.modelData.status === 'restarting' ? 1 : 0
               }
             }
           }
@@ -190,9 +202,8 @@ Loader {
       }
       EmptyState {
         width: parent.width
-        visible: mobile.chargers.length === 0
-        title: '暂时没有电桩信息'
-        description: '刷新后重试。'
+        visible: mobile.chargers.length === 0 && !mobile.error
+        title: '暂无充电桩'
       }
       AppText {
         width: parent.width
